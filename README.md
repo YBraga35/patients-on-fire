@@ -114,7 +114,13 @@ O servidor `PatientsOnFIRE` expõe os seguintes endpoints para manipulação de 
 
 ---
 
-## 5. Autores
+## 5. Documentação
+
+Primeiro arquivo documentado que é o de preparação, em seguida o de implementação. Ambos podem ser vistos nas páginas:
+[Preparação](docs/fase-0-preparacao.md)
+[Implementação](docs/fase-0-implementacao.md)
+
+## 6. Autores
 
 *   *Carlise Sebastiany*
 *   *Luciana Marques*
