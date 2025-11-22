@@ -1,0 +1,468 @@
+/**
+ * styles.css
+ *
+ * Estilos CSS para a aplicação CRUDEPatients.
+ *
+ * OBJETIVO:
+ * Fornecer aparência profissional e organizada para a interface,
+ * melhorando legibilidade e experiência do usuário.
+ *
+ * COMPONENTES ESTILIZADOS:
+ * - Layout geral (container, sections)
+ * - Formulários (inputs, buttons)
+ * - Áreas de exibição (patient-display, ids-list)
+ * - Mensagens (success, error, info)
+ * - Responsividade básica
+ *
+ * RESULTADO ESPERADO:
+ * Interface limpa, organizada e de fácil navegação, com feedback
+ * visual claro para ações do usuário.
+ */
+
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Variáveis CSS para consistência de tema */
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --success-color: #27ae60;
+    --danger-color: #e74c3c;
+    --warning-color: #f39c12;
+    --info-color: #3498db;
+    --bg-color: #ecf0f1;
+    --text-color: #2c3e50;
+    --border-color: #bdc3c7;
+    --light-gray: #f8f9fa;
+}
+
+/* Estilos globais */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    padding: 20px;
+}
+
+/* Container principal */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Cabeçalho */
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid var(--primary-color);
+}
+
+header h1 {
+    color: var(--primary-color);
+    margin-bottom: 10px;
+    font-size: 2.5em;
+}
+
+header p {
+    color: #7f8c8d;
+    font-size: 1.1em;
+}
+
+.subtitle {
+    color: #95a5a6;
+    font-size: 0.9em;
+    font-style: italic;
+}
+
+/* Seções */
+.section {
+    margin-bottom: 30px;
+    padding: 25px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: #fefefe;
+}
+
+.section h2 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.8em;
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 10px;
+}
+
+/* Texto de ajuda */
+.help-text {
+    color: #7f8c8d;
+    font-size: 0.9em;
+    margin-bottom: 15px;
+    font-style: italic;
+}
+
+/* Placeholders */
+.placeholder {
+    color: #95a5a6;
+    font-style: italic;
+    padding: 15px;
+    background: var(--light-gray);
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* Formulários */
+.patient-form {
+    margin-top: 15px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 5px;
+    font-size: 0.95em;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group input[type="number"],
+.form-group select {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1em;
+    font-family: inherit;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.checkbox-label span {
+    font-weight: 600;
+}
+
+/* Botões */
+button {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.1s;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #2980b9;
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background-color: var(--secondary-color);
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 0.85em;
+    margin-top: 0;
+    margin-left: 10px;
+}
+
+/* Formulários de busca/exclusão */
+.search-form,
+.delete-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.search-form label,
+.delete-form label {
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+.search-form input,
+.delete-form input {
+    flex: 1;
+    min-width: 150px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+/* Área de mensagens */
+.message-area {
+    min-height: 60px;
+    margin-bottom: 20px;
+}
+
+.message {
+    padding: 15px 20px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    font-weight: 500;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid var(--success-color);
+}
+
+.message-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid var(--danger-color);
+}
+
+.message-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left: 4px solid var(--info-color);
+}
+
+/* Exibição de paciente */
+.patient-display {
+    margin-top: 15px;
+}
+
+.patient-card {
+    background: var(--light-gray);
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid var(--secondary-color);
+}
+
+.patient-card h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+
+.patient-card p {
+    margin-bottom: 10px;
+    font-size: 1.05em;
+}
+
+.patient-card strong {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.patient-card details {
+    margin-top: 15px;
+    padding: 10px;
+    background: white;
+    border-radius: 5px;
+}
+
+.patient-card summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--secondary-color);
+    padding: 5px;
+}
+
+.patient-card summary:hover {
+    color: #2980b9;
+}
+
+.patient-card pre {
+    background: #2c3e50;
+    color: #ecf0f1;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    font-size: 0.9em;
+    margin-top: 10px;
+}
+
+/* Lista de IDs */
+.ids-list {
+    margin-top: 15px;
+}
+
+.patient-ids-list {
+    list-style: none;
+    padding: 0;
+}
+
+.patient-id-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    background: var(--light-gray);
+    border-left: 4px solid var(--secondary-color);
+    border-radius: 5px;
+    margin-bottom: 10px;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.patient-id-item:hover {
+    background: #e8eef2;
+    transform: translateX(5px);
+}
+
+.id-badge {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1.1em;
+}
+
+/* Rodapé */
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 2px solid var(--border-color);
+    color: #7f8c8d;
+    font-size: 0.9em;
+}
+
+/* Responsividade para mobile */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    header h1 {
+        font-size: 2em;
+    }
+
+    .section {
+        padding: 15px;
+    }
+
+    .section h2 {
+        font-size: 1.5em;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .search-form,
+    .delete-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-form input,
+    .delete-form input {
+        min-width: 100%;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    .patient-id-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .patient-id-item .btn-small {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+/* Utilitários */
+.hidden {
+    display: none;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mt-1 {
+    margin-top: 10px;
+}
+
+.mt-2 {
+    margin-top: 20px;
+}
+
+.mb-1 {
+    margin-bottom: 10px;
+}
+
+.mb-2 {
+    margin-bottom: 20px;
+}

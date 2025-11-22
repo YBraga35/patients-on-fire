@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUDEPatients - PatientsOnFIRE Client</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!--
+    index.html
+
+    Aplicação cliente CRUDEPatients para gerenciamento de recursos Patient.
+
+    OBJETIVO:
+    Fornecer interface web para realizar operações CRUD sobre pacientes
+    através da API REST do servidor PatientsOnFIRE.
+
+    SEÇÕES DA INTERFACE:
+
+    1. Cabeçalho: Título e descrição do sistema
+
+    2. Seção de Criação: Formulário para criar novo paciente
+       - Campos: name (family, given), gender, birthDate, active, etc.
+       - Botão: Criar Paciente (POST /Patient)
+
+    3. Seção de Consulta: Buscar paciente por ID
+       - Input: ID do paciente
+       - Botão: Buscar (GET /Patient/<ID>)
+       - Área de exibição dos dados encontrados
+
+    4. Seção de Atualização: Editar paciente existente
+       - Formulário pré-preenchido com dados do paciente
+       - Botão: Atualizar (PUT /Patient/<ID>)
+
+    5. Seção de Exclusão: Remover paciente
+       - Input: ID do paciente
+       - Botão: Excluir (DELETE /Patient/<ID>)
+
+    6. Seção de Listagem: Visualizar todos os IDs
+       - Botão: Carregar IDs (GET /PatientIDs)
+       - Lista clicável de IDs
+
+    7. Área de Mensagens: Feedback de sucesso/erro
+
+    SCRIPTS:
+    - js/api.js: Comunicação com servidor
+    - js/ui.js: Lógica de interface
+
+    RESULTADO ESPERADO:
+    Interface completa e funcional para todas as operações CRUD,
+    com feedback visual claro e UX intuitiva.
+    -->
+
+    <div class="container">
+        <!-- Cabeçalho -->
+        <header>
+            <h1>CRUDEPatients</h1>
+            <p>Cliente Web para gerenciamento de recursos FHIR Patient</p>
+            <p class="subtitle">Sistema PatientsOnFIRE - Fundamentos de Redes e Sistemas Distribuídos</p>
+        </header>
+
+        <!-- Área de Mensagens -->
+        <div id="message-area" class="message-area">
+            <!-- Mensagens de sucesso/erro serão exibidas aqui -->
+        </div>
+
+        <!-- Seção 1: Criar Paciente -->
+        <section class="section">
+            <h2>Criar Novo Paciente</h2>
+            <form id="create-form" class="patient-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="create-family-name">Nome de Família (Sobrenome):</label>
+                        <input type="text" id="create-family-name" name="familyName" placeholder="Silva" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="create-given-name">Nome(s) Próprio(s):</label>
+                        <input type="text" id="create-given-name" name="givenName" placeholder="João Pedro" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="create-gender">Gênero Administrativo:</label>
+                        <select id="create-gender" name="gender">
+                            <option value="">Selecione...</option>
+                            <option value="male">Masculino</option>
+                            <option value="female">Feminino</option>
+                            <option value="other">Outro</option>
+                            <option value="unknown">Não informado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="create-birthdate">Data de Nascimento:</label>
+                        <input type="date" id="create-birthdate" name="birthDate">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="create-active" name="active" checked>
+                            <span>Paciente Ativo</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">Criar Paciente</button>
+            </form>
+        </section>
+
+        <!-- Seção 2: Buscar Paciente -->
+        <section class="section">
+            <h2>Buscar Paciente por ID</h2>
+            <div class="search-form">
+                <label for="search-id">ID do Paciente:</label>
+                <input type="number" id="search-id" min="1" placeholder="Digite o ID">
+                <button id="search-btn">Buscar</button>
+            </div>
+            <div id="patient-display" class="patient-display">
+                <!-- Dados do paciente serão exibidos aqui -->
+                <p class="placeholder">Nenhum paciente carregado</p>
+            </div>
+        </section>
+
+        <!-- Seção 3: Atualizar Paciente -->
+        <section class="section">
+            <h2>Atualizar Paciente</h2>
+            <p class="help-text">Busque um paciente na seção acima para preencher automaticamente este formulário.</p>
+            <form id="update-form" class="patient-form">
+                <input type="hidden" id="update-id">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="update-family-name">Nome de Família (Sobrenome):</label>
+                        <input type="text" id="update-family-name" name="familyName" placeholder="Silva" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="update-given-name">Nome(s) Próprio(s):</label>
+                        <input type="text" id="update-given-name" name="givenName" placeholder="João Pedro" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="update-gender">Gênero Administrativo:</label>
+                        <select id="update-gender" name="gender">
+                            <option value="">Selecione...</option>
+                            <option value="male">Masculino</option>
+                            <option value="female">Feminino</option>
+                            <option value="other">Outro</option>
+                            <option value="unknown">Não informado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="update-birthdate">Data de Nascimento:</label>
+                        <input type="date" id="update-birthdate" name="birthDate">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="update-active" name="active" checked>
+                            <span>Paciente Ativo</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">Atualizar Paciente</button>
+            </form>
+        </section>
+
+        <!-- Seção 4: Excluir Paciente -->
+        <section class="section">
+            <h2>Excluir Paciente</h2>
+            <div class="delete-form">
+                <label for="delete-id">ID do Paciente:</label>
+                <input type="number" id="delete-id" min="1" placeholder="Digite o ID">
+                <button id="delete-btn" class="btn-danger">Excluir</button>
+            </div>
+        </section>
+
+        <!-- Seção 5: Listar IDs -->
+        <section class="section">
+            <h2>Lista de Pacientes</h2>
+            <button id="load-ids-btn">Carregar Lista de IDs</button>
+            <div id="ids-list" class="ids-list">
+                <!-- Lista de IDs será exibida aqui -->
+                <p class="placeholder">Clique no botão para carregar a lista</p>
+            </div>
+        </section>
+
+        <!-- Rodapé -->
+        <footer>
+            <p>PatientsOnFIRE v1.0 | UFCSPA 2025/2</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+
+    <script>
+        console.log('CRUDEPatients loaded successfully');
+        console.log('API Base URL:', API_BASE_URL);
+    </script>
+</body>
+</html>
