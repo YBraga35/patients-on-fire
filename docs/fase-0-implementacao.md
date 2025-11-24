@@ -21,7 +21,7 @@
 
 **Arquitetura:**
 - **Servidor (PatientsOnFIRE):** API REST Node.js puro (sem frameworks)
-- **Cliente (CRUDEPatients):** Interface web HTML/CSS/JavaScript vanilla
+- **Cliente (CRUDPatients):** Interface web HTML/CSS/JavaScript vanilla
 - **Protocolo:** HTTP/1.1
 - **Formato de dados:** JSON (FHIR Patient v5.0.0)
 - **Persistência:** Opcional em arquivo JSON ou memória

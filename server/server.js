@@ -23,7 +23,7 @@
  *
  * RESULTADO ESPERADO:
  * Servidor HTTP rodando em http://127.0.0.1:8080 (ou conforme config.js),
- * pronto para receber e processar requisições REST do cliente CRUDEPatients.
+ * pronto para receber e processar requisições REST do cliente CRUDPatients.
  */
 
 const http = require('http');
@@ -52,7 +52,7 @@ async function startServer() {
     // Iniciar servidor
     server.listen(config.PORT, config.HOST, () => {
       console.log('\n=== Server Started Successfully ===');
-      console.log(`API and CRUDEPatients client running at http://${config.HOST}:${config.PORT}/`);
+      console.log(`API and CRUDPatients client running at http://${config.HOST}:${config.PORT}/`);
       console.log(`Base path for API: "${config.BASE_PATH || '/'}"`);
       console.log(`Persistence: ${config.ENABLE_PERSISTENCE ? 'Enabled' : 'Disabled'}`);
       console.log('\nAPI endpoints:');

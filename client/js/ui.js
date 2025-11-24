@@ -1,7 +1,7 @@
 /**
  * ui.js
  *
- * Módulo de interface do usuário para a aplicação CRUDEPatients.
+ * Módulo de interface do usuário para a aplicação CRUDPatients.
  *
  * OBJETIVO:
  * Gerenciar toda a interação do usuário com a interface HTML, incluindo:

@@ -2,7 +2,7 @@
 
 Este projeto é uma implementação de um sistema distribuído cliente-servidor para gerenciamento de pacientes, desenvolvido como parte da disciplina de **Fundamentos de Redes de Computadores e Sistemas Distribuídos**.
 
-O sistema consiste em um servidor de API RESTful (`PatientsOnFIRE`) construído com Node.js puro (sem frameworks) e uma aplicação cliente web (`CRUDEPatients`) desenvolvida com HTML, CSS e JavaScript vanilla.
+O sistema consiste em um servidor de API RESTful (`PatientsOnFIRE`) construído com Node.js puro (sem frameworks) e uma aplicação cliente web (`CRUDPatients`) desenvolvida com HTML, CSS e JavaScript vanilla.
 
 O objetivo principal é aplicar os conceitos de comunicação em rede, arquitetura de serviços web e o protocolo HTTP, utilizando o padrão de interoperabilidade de saúde **HL7 FHIR** para a modelagem de dados do recurso `Patient`.
 
@@ -32,7 +32,7 @@ O projeto está organizado da seguinte forma para garantir a separação de resp
 
 ```
 patients-on-fire/
-├── client/         # Contém a aplicação frontend (CRUDEPatients)
+├── client/         # Contém a aplicação frontend (CRUDPatients)
 │   ├── index.html  # Estrutura da página
 │   ├── css/styles.css # Estilos visuais
 │   └── js/
@@ -90,7 +90,7 @@ Siga os passos abaixo para rodar a aplicação localmente.
     http://127.0.0.1:8080/
     ```
 
-A aplicação cliente `CRUDEPatients` será carregada, e você poderá começar a interagir com o sistema para criar, ler, atualizar e deletar pacientes.
+A aplicação cliente `CRUDPatients` será carregada, e você poderá começar a interagir com o sistema para criar, ler, atualizar e deletar pacientes.
 
 ---
 
