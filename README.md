@@ -122,7 +122,7 @@ Primeiro arquivo documentado que é o de preparação, em seguida o de implement
 
 ## 6. Autores
 
-*   *Carlise Sebastiany*
+*   *Carlise VR Sebastiany*
 *   *Luciana Marques*
 *   *Julia Boteon*
 *   *Helena Tubino*
