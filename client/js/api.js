@@ -57,7 +57,7 @@ const API_BASE_URL = 'http://127.0.0.1:8080';
  * @param {Object} patientObj - Objeto com dados do paciente (sem identifier)
  * @returns {Promise<Object>} Promise que resolve com paciente criado
  */
-async function createPatient(patientObj) {
+export async function createPatient(patientObj) {
   const response = await fetch(`${API_BASE_URL}/Patient`, {
     method: 'POST',
     headers: {
@@ -83,7 +83,7 @@ async function createPatient(patientObj) {
  * @param {number} id - ID do paciente
  * @returns {Promise<Object>} Promise que resolve com dados do paciente
  */
-async function readPatient(id) {
+export async function readPatient(id) {
   const response = await fetch(`${API_BASE_URL}/Patient/${id}`, {
     method: 'GET'
   });
@@ -98,7 +98,7 @@ async function readPatient(id) {
  * @param {Object} patientObj - Objeto com dados atualizados (deve conter identifier)
  * @returns {Promise<Object>} Promise que resolve com paciente atualizado
  */
-async function updatePatient(id, patientObj) {
+export async function updatePatient(id, patientObj) {
   // Garantir que identifier está correto
   patientObj.identifier = Number(id);
 
@@ -119,7 +119,7 @@ async function updatePatient(id, patientObj) {
  * @param {number} id - ID do paciente
  * @returns {Promise<void>} Promise que resolve quando exclusão completar
  */
-async function deletePatient(id) {
+export async function deletePatient(id) {
   const response = await fetch(`${API_BASE_URL}/Patient/${id}`, {
     method: 'DELETE'
   });
@@ -132,7 +132,7 @@ async function deletePatient(id) {
  *
  * @returns {Promise<number[]>} Promise que resolve com array de IDs
  */
-async function getPatientIDs() {
+export async function getPatientIDs() {
   const response = await fetch(`${API_BASE_URL}/PatientIDs`, {
     method: 'GET'
   });
@@ -179,5 +179,4 @@ async function handleResponse(response) {
   throw error;
 }
 
-// Exportar funções (se usando módulos ES6) ou deixar no escopo global
-// Para HTML simples, as funções ficarão disponíveis globalmente
+

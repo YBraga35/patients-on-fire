@@ -39,6 +39,276 @@
  * as operações CRUD sobre pacientes, com feedback claro de sucesso/erro.
  */
 
+import { createPatient, readPatient, updatePatient, deletePatient, getPatientIDs } from './api.js';
+
+/**
+ * Exibe dados de um paciente na interface.
+ *
+ * @param {Object} patient - Objeto Patient
+ */
+function displayPatient(patient) {
+  const displayDiv = document.getElementById('patient-display');
+  if (!displayDiv) return;
+
+  // Armazenar ID do paciente no elemento
+  displayDiv.dataset.patientId = patient.identifier;
+
+  // Construir HTML com dados do paciente
+  let html = '<div class="patient-card">';
+  html += `<h3>Paciente ID: ${patient.identifier}</h3>`;
+
+  // Status ativo
+  html += `<p><strong>Status:</strong> ${patient.active ? 'Ativo' : 'Inativo'}</p>`;
+
+  // Nome
+  if (patient.name && patient.name.length > 0) {
+    const name = patient.name[0];
+    const fullName = `${name.given ? name.given.join(' ') : ''} ${name.family || ''}`.trim();
+    html += `<p><strong>Nome:</strong> ${fullName || 'Não informado'}</p>`;
+  }
+
+  // Gênero
+  if (patient.gender) {
+    const genderMap = {
+      'male': 'Masculino',
+      'female': 'Feminino',
+      'other': 'Outro',
+      'unknown': 'Não informado'
+    };
+    html += `<p><strong>Gênero:</strong> ${genderMap[patient.gender] || patient.gender}</p>`;
+  }
+
+  // Data de nascimento
+  if (patient.birthDate) {
+    html += `<p><strong>Data de Nascimento:</strong> ${patient.birthDate}</p>`;
+  }
+
+  // Dados completos em JSON (para debug)
+  html += '<details><summary>Dados Completos (JSON)</summary>';
+  html += `<pre>${JSON.stringify(patient, null, 2)}</pre>`;
+  html += '</details>';
+
+  html += '</div>';
+
+  displayDiv.innerHTML = html;
+}
+
+/**
+ * Exibe mensagem para o usuário.
+ *
+ * @param {string} message - Mensagem a exibir
+ * @param {string} type - Tipo: 'success', 'error', 'info'
+ */
+function displayMessage(message, type = 'info') {
+  const messageArea = document.getElementById('message-area');
+  if (!messageArea) {
+    console.log(`[${type.toUpperCase()}] ${message}`);
+    return;
+  }
+
+  // Criar elemento de mensagem
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `message message-${type}`;
+  messageDiv.textContent = message;
+
+  // Limpar mensagens anteriores
+  messageArea.innerHTML = '';
+
+  // Adicionar nova mensagem
+  messageArea.appendChild(messageDiv);
+
+  // Auto-remover após 5 segundos (exceto erros)
+  if (type !== 'error') {
+    setTimeout(() => {
+      if (messageDiv.parentNode === messageArea) {
+        messageArea.removeChild(messageDiv);
+      }
+    }, 5000);
+  }
+}
+
+/**
+ * Limpa todos os formulários.
+ */
+function clearForms() {
+  const createForm = document.getElementById('create-form');
+  const updateForm = document.getElementById('update-form');
+
+  if (createForm) createForm.reset();
+  if (updateForm) updateForm.reset();
+
+  const patientDisplay = document.getElementById('patient-display');
+  if (patientDisplay) {
+    patientDisplay.innerHTML = '<p class="placeholder">Nenhum paciente carregado</p>';
+  }
+}
+
+/**
+ * Preenche formulário de edição com dados de um paciente.
+ *
+ * @param {Object} patient - Objeto Patient
+ */
+function populateEditForm(patient) {
+  // Armazenar ID em campo oculto
+  const idField = document.getElementById('update-id');
+  if (idField) {
+    idField.value = patient.identifier;
+  }
+
+  // Preencher campos
+  const familyNameField = document.getElementById('update-family-name');
+  const givenNameField = document.getElementById('update-given-name');
+  const genderField = document.getElementById('update-gender');
+  const birthDateField = document.getElementById('update-birthdate');
+  const activeField = document.getElementById('update-active');
+
+  // Nome
+  if (patient.name && patient.name.length > 0) {
+    const name = patient.name[0];
+    if (familyNameField) familyNameField.value = name.family || '';
+    if (givenNameField) givenNameField.value = name.given ? name.given.join(' ') : '';
+  }
+
+  // Gênero
+  if (genderField && patient.gender) {
+    genderField.value = patient.gender;
+  }
+
+  // Data de nascimento
+  if (birthDateField && patient.birthDate) {
+    birthDateField.value = patient.birthDate;
+  }
+
+  // Status ativo
+  if (activeField) {
+    activeField.checked = patient.active !== false;
+  }
+}
+
+/**
+ * Converte dados do formulário para objeto Patient FHIR.
+ *
+ * @param {HTMLFormElement} form - Formulário HTML
+ * @returns {Object} Objeto Patient no formato FHIR
+ */
+function formToPatient(form) {
+  // Determinar qual formulário (create ou update)
+  const isUpdate = form.id === 'update-form';
+  const prefix = isUpdate ? 'update-' : 'create-';
+
+  // Extrair valores dos campos
+  const familyName = form.querySelector(`#${prefix}family-name`).value.trim();
+  const givenName = form.querySelector(`#${prefix}given-name`).value.trim();
+  const gender = form.querySelector(`#${prefix}gender`).value;
+  const birthDate = form.querySelector(`#${prefix}birthdate`).value;
+  const active = form.querySelector(`#${prefix}active`).checked;
+
+  // Construir objeto Patient FHIR
+  const patient = {
+    resourceType: 'Patient',
+    active: active
+  };
+
+  // Nome (obrigatório tem pelo menos um)
+  if (familyName || givenName) {
+    patient.name = [{
+      family: familyName,
+      given: givenName ? givenName.split(' ') : []
+    }];
+  }
+
+  // Gênero
+  if (gender) {
+    patient.gender = gender;
+  }
+
+  // Data de nascimento
+  if (birthDate) {
+    patient.birthDate = birthDate;
+  }
+
+  return patient;
+}
+
+/**
+ * Converte objeto Patient para valores de formulário.
+ *
+ * @param {Object} patient - Objeto Patient
+ * @returns {Object} Objeto com valores prontos para inputs
+ */
+function patientToForm(patient) {
+  const formData = {
+    familyName: '',
+    givenName: '',
+    gender: '',
+    birthDate: '',
+    active: true
+  };
+
+  // Extrair nome
+  if (patient.name && patient.name.length > 0) {
+    const name = patient.name[0];
+    formData.familyName = name.family || '';
+    formData.givenName = name.given ? name.given.join(' ') : '';
+  }
+
+  // Outros campos
+  formData.gender = patient.gender || '';
+  formData.birthDate = patient.birthDate || '';
+  formData.active = patient.active !== false;
+
+  return formData;
+}
+
+/**
+ * Função auxiliar para carregar paciente ao clicar na lista.
+ * @param {number} id - ID do paciente
+ */
+function loadPatientById(id) {
+  const searchInput = document.getElementById('search-id');
+  if (searchInput) {
+    searchInput.value = id;
+    onReadPatient();
+  }
+}
+
+/**
+ * Cria um item de lista HTML para um paciente.
+ * @param {number} id - O ID do paciente.
+ * @param {object} patient - O objeto do paciente FHIR.
+ * @returns {HTMLElement} O elemento <li> construído.
+ */
+function createPatientListItem(id, patient) {
+  const li = document.createElement('li');
+  li.className = 'patient-id-item';
+  li.dataset.id = id;
+
+  let patientName = 'Nome não disponível';
+  if (patient.name && patient.name.length > 0) {
+    const name = patient.name[0];
+    patientName = `${name.given ? name.given.join(' ') : ''} ${name.family || ''}`.trim();
+  }
+
+  const idBadge = document.createElement('span');
+  idBadge.className = 'id-badge';
+  idBadge.textContent = `ID: ${id}`;
+
+  const nameSpan = document.createElement('span');
+  nameSpan.textContent = patientName;
+
+  const button = document.createElement('button');
+  button.className = 'btn-small';
+  button.textContent = 'Visualizar';
+  button.onclick = () => loadPatientById(id); // Attach listener programmatically
+
+  li.appendChild(idBadge);
+  li.appendChild(nameSpan);
+  li.appendChild(button);
+
+  return li;
+}
+
+
 /**
  * Inicializa a interface do usuário.
  * Deve ser chamada quando o DOM estiver carregado.
@@ -240,287 +510,49 @@ async function onDeletePatient() {
 }
 
 /**
- * Handler para carregar lista de IDs.
+ * Carrega a lista de todos os pacientes e exibe seus detalhes.
  */
 async function onLoadPatientIDs() {
   try {
     displayMessage('Carregando lista de pacientes...', 'info');
-
-    // Chamar API
     const ids = await getPatientIDs();
 
-    // Exibir lista
-    displayPatientList(ids);
-
-    if (ids.length === 0) {
-      displayMessage('Nenhum paciente cadastrado no sistema', 'info');
-    } else {
-      displayMessage(`${ids.length} paciente(s) encontrado(s)`, 'success');
+    const patientList = document.getElementById('ids-list');
+    if (!patientList) {
+      console.error('[UI] Element with ID "ids-list" not found.');
+      return;
     }
 
-  } catch (error) {
-    displayMessage(`Erro ao carregar lista: ${error.message}`, 'error');
-    console.error('[UI] Load IDs error:', error);
-  }
-}
+    if (ids.length === 0) {
+      patientList.innerHTML =
+        '<div class="alert alert-info">Nenhum paciente cadastrado.</div>';
+      displayMessage('Nenhum paciente cadastrado no sistema', 'info');
+      return;
+    }
 
-/**
- * Exibe dados de um paciente na interface.
- *
- * @param {Object} patient - Objeto Patient
- */
-function displayPatient(patient) {
-  const displayDiv = document.getElementById('patient-display');
-  if (!displayDiv) return;
+    patientList.innerHTML = '';
 
-  // Armazenar ID do paciente no elemento
-  displayDiv.dataset.patientId = patient.identifier;
-
-  // Construir HTML com dados do paciente
-  let html = '<div class="patient-card">';
-  html += `<h3>Paciente ID: ${patient.identifier}</h3>`;
-
-  // Status ativo
-  html += `<p><strong>Status:</strong> ${patient.active ? 'Ativo' : 'Inativo'}</p>`;
-
-  // Nome
-  if (patient.name && patient.name.length > 0) {
-    const name = patient.name[0];
-    const fullName = `${name.given ? name.given.join(' ') : ''} ${name.family || ''}`.trim();
-    html += `<p><strong>Nome:</strong> ${fullName || 'Não informado'}</p>`;
-  }
-
-  // Gênero
-  if (patient.gender) {
-    const genderMap = {
-      'male': 'Masculino',
-      'female': 'Feminino',
-      'other': 'Outro',
-      'unknown': 'Não informado'
-    };
-    html += `<p><strong>Gênero:</strong> ${genderMap[patient.gender] || patient.gender}</p>`;
-  }
-
-  // Data de nascimento
-  if (patient.birthDate) {
-    html += `<p><strong>Data de Nascimento:</strong> ${patient.birthDate}</p>`;
-  }
-
-  // Dados completos em JSON (para debug)
-  html += '<details><summary>Dados Completos (JSON)</summary>';
-  html += `<pre>${JSON.stringify(patient, null, 2)}</pre>`;
-  html += '</details>';
-
-  html += '</div>';
-
-  displayDiv.innerHTML = html;
-}
-
-/**
- * Exibe lista de IDs de pacientes.
- *
- * @param {number[]} ids - Array de IDs
- */
-function displayPatientList(ids) {
-  const listDiv = document.getElementById('ids-list');
-  if (!listDiv) return;
-
-  if (ids.length === 0) {
-    listDiv.innerHTML = '<p class="placeholder">Nenhum paciente cadastrado</p>';
-    return;
-  }
-
-  // Criar lista clicável
-  let html = '<ul class="patient-ids-list">';
-  ids.forEach(id => {
-    html += `<li class="patient-id-item" data-id="${id}">`;
-    html += `<span class="id-badge">ID: ${id}</span>`;
-    html += `<button class="btn-small" onclick="loadPatientById(${id})">Visualizar</button>`;
-    html += '</li>';
-  });
-  html += '</ul>';
-
-  listDiv.innerHTML = html;
-}
-
-/**
- * Função auxiliar para carregar paciente ao clicar na lista.
- * @param {number} id - ID do paciente
- */
-function loadPatientById(id) {
-  const searchInput = document.getElementById('search-id');
-  if (searchInput) {
-    searchInput.value = id;
-    onReadPatient();
-  }
-}
-
-/**
- * Exibe mensagem para o usuário.
- *
- * @param {string} message - Mensagem a exibir
- * @param {string} type - Tipo: 'success', 'error', 'info'
- */
-function displayMessage(message, type = 'info') {
-  const messageArea = document.getElementById('message-area');
-  if (!messageArea) {
-    console.log(`[${type.toUpperCase()}] ${message}`);
-    return;
-  }
-
-  // Criar elemento de mensagem
-  const messageDiv = document.createElement('div');
-  messageDiv.className = `message message-${type}`;
-  messageDiv.textContent = message;
-
-  // Limpar mensagens anteriores
-  messageArea.innerHTML = '';
-
-  // Adicionar nova mensagem
-  messageArea.appendChild(messageDiv);
-
-  // Auto-remover após 5 segundos (exceto erros)
-  if (type !== 'error') {
-    setTimeout(() => {
-      if (messageDiv.parentNode === messageArea) {
-        messageArea.removeChild(messageDiv);
+    for (const id of ids) {
+      try {
+        const patient = await readPatient(id);
+        const patientItem = createPatientListItem(id, patient);
+        patientList.appendChild(patientItem);
+      } catch (error) {
+        console.error(`[UI] Failed to load patient with ID ${id}:`, error);
+        const errorItem = document.createElement('li');
+        errorItem.className = 'patient-id-item error';
+        errorItem.textContent = `Erro ao carregar paciente ID: ${id}`;
+        patientList.appendChild(errorItem);
       }
-    }, 5000);
+    }
+    displayMessage(`${ids.length} paciente(s) encontrado(s)`, 'success');
+
+  } catch (error) {
+    displayMessage('Erro ao carregar pacientes: ' + error.message, 'danger');
+    console.error('[UI] Load Patients Error:', error);
   }
 }
 
-/**
- * Limpa todos os formulários.
- */
-function clearForms() {
-  const createForm = document.getElementById('create-form');
-  const updateForm = document.getElementById('update-form');
-
-  if (createForm) createForm.reset();
-  if (updateForm) updateForm.reset();
-
-  const patientDisplay = document.getElementById('patient-display');
-  if (patientDisplay) {
-    patientDisplay.innerHTML = '<p class="placeholder">Nenhum paciente carregado</p>';
-  }
-}
-
-/**
- * Preenche formulário de edição com dados de um paciente.
- *
- * @param {Object} patient - Objeto Patient
- */
-function populateEditForm(patient) {
-  // Armazenar ID em campo oculto
-  const idField = document.getElementById('update-id');
-  if (idField) {
-    idField.value = patient.identifier;
-  }
-
-  // Preencher campos
-  const familyNameField = document.getElementById('update-family-name');
-  const givenNameField = document.getElementById('update-given-name');
-  const genderField = document.getElementById('update-gender');
-  const birthDateField = document.getElementById('update-birthdate');
-  const activeField = document.getElementById('update-active');
-
-  // Nome
-  if (patient.name && patient.name.length > 0) {
-    const name = patient.name[0];
-    if (familyNameField) familyNameField.value = name.family || '';
-    if (givenNameField) givenNameField.value = name.given ? name.given.join(' ') : '';
-  }
-
-  // Gênero
-  if (genderField && patient.gender) {
-    genderField.value = patient.gender;
-  }
-
-  // Data de nascimento
-  if (birthDateField && patient.birthDate) {
-    birthDateField.value = patient.birthDate;
-  }
-
-  // Status ativo
-  if (activeField) {
-    activeField.checked = patient.active !== false;
-  }
-}
-
-/**
- * Converte dados do formulário para objeto Patient FHIR.
- *
- * @param {HTMLFormElement} form - Formulário HTML
- * @returns {Object} Objeto Patient no formato FHIR
- */
-function formToPatient(form) {
-  // Determinar qual formulário (create ou update)
-  const isUpdate = form.id === 'update-form';
-  const prefix = isUpdate ? 'update-' : 'create-';
-
-  // Extrair valores dos campos
-  const familyName = form.querySelector(`#${prefix}family-name`).value.trim();
-  const givenName = form.querySelector(`#${prefix}given-name`).value.trim();
-  const gender = form.querySelector(`#${prefix}gender`).value;
-  const birthDate = form.querySelector(`#${prefix}birthdate`).value;
-  const active = form.querySelector(`#${prefix}active`).checked;
-
-  // Construir objeto Patient FHIR
-  const patient = {
-    resourceType: 'Patient',
-    active: active
-  };
-
-  // Nome (obrigatório tem pelo menos um)
-  if (familyName || givenName) {
-    patient.name = [{
-      family: familyName,
-      given: givenName ? givenName.split(' ') : []
-    }];
-  }
-
-  // Gênero
-  if (gender) {
-    patient.gender = gender;
-  }
-
-  // Data de nascimento
-  if (birthDate) {
-    patient.birthDate = birthDate;
-  }
-
-  return patient;
-}
-
-/**
- * Converte objeto Patient para valores de formulário.
- *
- * @param {Object} patient - Objeto Patient
- * @returns {Object} Objeto com valores prontos para inputs
- */
-function patientToForm(patient) {
-  const formData = {
-    familyName: '',
-    givenName: '',
-    gender: '',
-    birthDate: '',
-    active: true
-  };
-
-  // Extrair nome
-  if (patient.name && patient.name.length > 0) {
-    const name = patient.name[0];
-    formData.familyName = name.family || '';
-    formData.givenName = name.given ? name.given.join(' ') : '';
-  }
-
-  // Outros campos
-  formData.gender = patient.gender || '';
-  formData.birthDate = patient.birthDate || '';
-  formData.active = patient.active !== false;
-
-  return formData;
-}
 
 // Inicializar quando DOM estiver pronto
 document.addEventListener('DOMContentLoaded', init);
